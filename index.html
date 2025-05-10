@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>もちウサGPTチャットボット</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; padding: 20px; background: #fffaf4; color: #333; }
+    #chat { border: 1px solid #ddd; padding: 10px; border-radius: 8px; max-width: 600px; margin: auto; background: #fff; }
+    .msg { margin: 10px 0; }
+    .bot { color: #a0522d; font-weight: bold; }
+    .user { color: #333; }
+    #answerInput { width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { margin-top: 10px; padding: 8px 16px; background: #a36c3e; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #875b30; }
+    #result { white-space: pre-wrap; background: #fdf5e6; padding: 10px; border: 1px dashed #ccc; border-radius: 6px; margin-top: 20px; }
+    .mochiusa { position: fixed; bottom: 20px; right: 20px; width: 80px; }
+  </style>
+</head>
+<body>
+  <h2>もちウサGPTと一緒にプロンプトを作ろう</h2>
+  <div id="chat"></div>
+
+  <input type="text" id="answerInput" placeholder="ここに答えを入力してね" />
+  <button onclick="nextStep()">次へ</button>
+
+  <div id="result"></div>
+  <button onclick="copyPrompt()">プロンプトをコピー</button>
+
+  <img src="8033D5B3-B421-432E-A1DB-E2510FEE9CD4.png" alt="もちウサGPT" class="mochiusa" />
+
+  <script>
+    const questions = [
+      "どんな機能を持った手帳を作りたい？",
+      "必要な機能をすべて教えて（ページに分けるかはあとで考えるね）",
+      "この手帳は誰が使うの？（例：自分、他スタッフ、顧客）",
+      "スマホ・PCどっちで使う予定？",
+      "データはどこに保存したい？（例：ローカル、スプレッドシート、GAS）",
+      "デザインや雰囲気はどんな感じにしたい？"
+    ];
+    const answers = [];
+    let step = 0;
+
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('answerInput');
+    const result = document.getElementById('result');
+
+    function showMessage(text, sender = 'bot') {
+      const div = document.createElement('div');
+      div.className = 'msg ' + sender;
+      div.textContent = (sender === 'bot' ? 'もちウサGPT：' : 'あなた：') + text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function nextStep() {
+      const val = input.value.trim();
+      if (!val) return;
+      showMessage(val, 'user');
+      answers.push(val);
+      input.value = '';
+      step++;
+      if (step < questions.length) {
+        setTimeout(() => showMessage(questions[step]), 400);
+      } else {
+        generatePrompt();
+      }
+    }
+
+    function generatePrompt() {
+      const [purpose, features, userType, device, storage, style] = answers;
+      const prompt = `以下の条件で「システム手帳風のWebアプリ」をHTML＋JSで作成してください。
+
+- 目的：${purpose}
+- 必要な機能：${features}
+- 利用者：${userType}
+- 利用デバイス：${device}
+- データ保存：${storage}
+- デザイン・UIの雰囲気：${style}
+
+上記に沿って、index.html からスタートできる構成で、スマホでも快適に動作するように設計してください。`;
+
+      result.textContent = prompt;
+    }
+
+    function copyPrompt() {
+      const text = result.textContent;
+      navigator.clipboard.writeText(text).then(() => alert("コピーしました！"));
+    }
+
+    // 初回表示
+    showMessage(questions[0]);
+  </script>
+</body>
+</html>
